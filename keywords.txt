@@ -1,0 +1,26 @@
+#######################################
+# Syntax Coloring Map For R2AKT_CRC
+#######################################
+
+#######################################
+# Datatypes (KEYWORD1)
+#######################################
+
+CRC8 KEYWORD1
+CRC16 KEYWORD1
+CRC32 KEYWORD1
+
+#######################################
+# Methods and Functions (KEYWORD2)
+#######################################
+crc8_calc	KEYWORD2
+crc16_calc KEYWORD2
+crc32_calc KEYWORD2
+
+#######################################
+# Constants (LITERAL1)
+#######################################
+UCHAR_MAX	LITERAL1
+USHRT_MAX	LITERAL1
+ULONG_MAX	LITERAL1
+
