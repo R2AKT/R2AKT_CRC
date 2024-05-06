@@ -2,9 +2,9 @@
  *
  *    FILE NAME : r2akt_crc.c
  *       AUTHOR : Sergey Dorozhkin (R2AKT)
- *         DATE : 24-april-2024
- *      VERSION : 0.0.1
- * MODIFICATION : 2
+ *         DATE : 06-may-2024
+ *      VERSION : 0.0.2
+ * MODIFICATION : 3
  *      PURPOSE : CRC8, CRC16, CRC32 table library
  *          URL : https://github.com/R2AKT/r2akt_crc
  *
@@ -27,18 +27,13 @@
  *
  * CRC-32
  *   Poly  : 0x04C11DB7 x^32 + x^26 + x^23 + x^22 + x^16 + x^12 + x^11+ x^10 + x^8 + x^7 + x^5 + x^4 + x^2 + x + 1
- *   Revert: false
- *   XorOut: 0x00
+ *   Revert: true
+ *   XorOut: 0xFFFFFFFF
  *   Check : 0xCBF43926 ("123456789")
  *   MaxLen: 268 435 455 byte
  ******************************************************************************/
 
 #include "r2akt_crc.h"
-#ifdef ARDUINO
-	#ifndef ESP32
-		#include <avr/pgmspace.h>
-	#endif
-#endif
 #include <limits.h>
 #include <stdlib.h>
 #include <stdint.h> 
@@ -46,15 +41,7 @@
  /*****************************************************************************/
 
 /*======= (CRC-8) =======*/
-#ifdef ARDUINO
-	#ifndef ESP32
-		const uint8_t PROGMEM CRC8_Tbl[] = {
-	#else
-		const uint8_t CRC8_Tbl[] = {
-	#endif
-#else
 	const uint8_t CRC8_Tbl[] = {
-#endif
         0x00, 0x31, 0x62, 0x53, 0xC4, 0xF5, 0xA6, 0x97,
         0xB9, 0x88, 0xDB, 0xEA, 0x7D, 0x4C, 0x1F, 0x2E,
         0x43, 0x72, 0x21, 0x10, 0x87, 0xB6, 0xE5, 0xD4,
@@ -87,18 +74,10 @@
         0x78, 0x49, 0x1A, 0x2B, 0xBC, 0x8D, 0xDE, 0xEF,
         0x82, 0xB3, 0xE0, 0xD1, 0x46, 0x77, 0x24, 0x15,
         0x3B, 0x0A, 0x59, 0x68, 0xFF, 0xCE, 0x9D, 0xAC
-};
+	};
 
 /*======= (CRC-16 CCITT) =======*/
-#ifdef ARDUINO
-	#ifndef ESP32
-		const uint16_t PROGMEM CRC16_Tbl[] = {
-	#else
-		const uint16_t CRC16_Tbl[] = {
-	#endif
-#else
 	const uint16_t CRC16_Tbl[] = {
-#endif
   0x0000, 0x1021, 0x2042, 0x3063, 0x4084, 0x50A5, 0x60C6, 0x70E7,
   0x8108, 0x9129, 0xA14A, 0xB16B, 0xC18C, 0xD1AD, 0xE1CE, 0xF1EF,
   0x1231, 0x0210, 0x3273, 0x2252, 0x52B5, 0x4294, 0x72F7, 0x62D6,
@@ -131,18 +110,10 @@
   0x7C26, 0x6C07, 0x5C64, 0x4C45, 0x3CA2, 0x2C83, 0x1CE0, 0x0CC1,
   0xEF1F, 0xFF3E, 0xCF5D, 0xDF7C, 0xAF9B, 0xBFBA, 0x8FD9, 0x9FF8,
   0x6E17, 0x7E36, 0x4E55, 0x5E74, 0x2E93, 0x3EB2, 0x0ED1, 0x1EF0
-};
+	};
 
 /*======= (CRC-32-IEEE 802.3) =======*/
-#ifdef ARDUINO
-	#ifndef ESP32
-		const uint32_t PROGMEM CRC32_Tbl[] = {
-	#else
-		const uint32_t CRC32_Tbl[] = {
-	#endif
-#else
 	const uint32_t CRC32_Tbl[] = {
-#endif
     0x00000000, 0x77073096, 0xEE0E612C, 0x990951BA,
     0x076DC419, 0x706AF48F, 0xE963A535, 0x9E6495A3,
     0x0EDB8832, 0x79DCB8A4, 0xE0D5E91E, 0x97D2D988,
@@ -207,25 +178,70 @@
     0xBAD03605, 0xCDD70693, 0x54DE5729, 0x23D967BF,
     0xB3667A2E, 0xC4614AB8, 0x5D681B02, 0x2A6F2B94,
     0xB40BBE37, 0xC30C8EA1, 0x5A05DF1B, 0x2D02EF8D
-};
+	};
 
 /******************************************************************************/
-uint8_t  crc8_calc (uint8_t CRC8, const uint8_t *Buff, uint8_t size){
+uint8_t  crc8_calc_tbl (uint8_t CRC8, const uint8_t *Buff, uint8_t size){
 	while (size-- > 0) {
 		CRC8 = CRC8_Tbl[(CRC8 ^ *Buff++) & UCHAR_MAX];
 	}
 	return CRC8&UCHAR_MAX;
 }
+
+uint8_t  crc8_calc_poly (uint8_t CRC8, const uint8_t *Buff, uint8_t size){
+    while (size-- > 0) {
+		CRC8 ^= *Buff++;
+        for (uint16_t i = 0; i < CHAR_BIT; i++) {
+            CRC8 = CRC8 & 0x80 ? (CRC8 << 1) ^ 0x31 : CRC8 << 1;
+		}
+    }
+    return CRC8&UCHAR_MAX;
+}
 /******************************************************************************/
-uint16_t crc16_calc (uint16_t CRC16, const uint8_t *Buff, uint16_t size) {
-	while (size-- > 0)
+uint16_t crc16_calc_tbl (uint16_t CRC16, const uint8_t *Buff, uint16_t size) {
+	while (size-- > 0) {
 		CRC16 = (CRC16 << CHAR_BIT) ^ CRC16_Tbl[((CRC16 >> CHAR_BIT) ^ *Buff++) & UCHAR_MAX];
+	}
+	return CRC16&USHRT_MAX;
+}
+
+uint16_t crc16_calc_poly (uint16_t CRC16, const uint8_t *Buff, uint16_t size) {
+	#define CRC_POLY 0x1021
+	uint32_t data;
+	while (size-- > 0) {
+		data = ((uint32_t)*Buff++) << CHAR_BIT;
+		for (uint16_t j = 0; j < CHAR_BIT; j++) {
+			if ((data ^ CRC16) & 0x8000) {
+				CRC16 = (CRC16 << 1) ^ CRC_POLY;
+			} else {
+				CRC16 <<= 1;
+			}
+		data <<= 1;
+		}
+	}
 	return CRC16&USHRT_MAX;
 }
 /******************************************************************************/
-uint32_t  crc32_calc (uint32_t CRC32, const uint8_t *Buff, uint32_t size) {
-    while (size-- > 0)
+uint32_t  crc32_calc_tbl (uint32_t CRC32, const uint8_t *Buff, uint32_t size) {
+    while (size-- > 0) {
         CRC32 = (CRC32 >> CHAR_BIT) ^ CRC32_Tbl[(CRC32 ^ *Buff++) & UCHAR_MAX];
-    return CRC32&ULONG_MAX;
+	}
+    return CRC32^ULONG_MAX;
+}
+
+uint32_t  crc32_calc_poly (uint32_t CRC32, const uint8_t *Buff, uint32_t size) {
+	uint32_t crc_table[256], crc;
+
+    for (uint16_t i = 0; i < 256; i++) {
+        crc = i;
+        for (uint16_t j = 0; j < CHAR_BIT; j++) {
+            crc = crc & 1 ? (crc >> 1) ^ 0xEDB88320 : crc >> 1;
+		}
+        crc_table[i] = crc;
+    }
+    while (size-- > 0) {
+        CRC32 = crc_table[(CRC32 ^ *Buff++) & 0xFF] ^ (CRC32 >> 8);
+	}
+    return CRC32^ULONG_MAX;
 }
 /************************************************************** END OF FILE ***/
