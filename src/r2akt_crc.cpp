@@ -1,11 +1,11 @@
  /******************************************************************************
  *
- *    FILE NAME : r2akt_crc.c
+ *    FILE NAME : r2akt_crc.cpp
  *       AUTHOR : Sergey Dorozhkin (R2AKT)
  *         DATE : 06-may-2024
  *      VERSION : 0.0.2
  * MODIFICATION : 3
- *      PURPOSE : CRC8, CRC16, CRC32 table library
+ *      PURPOSE : CRC8, CRC16, CRC32 table & polynominal library
  *          URL : https://github.com/R2AKT/r2akt_crc
  *
  ******************************************************************************/
@@ -36,7 +36,7 @@
 #include "r2akt_crc.h"
 #include <limits.h>
 #include <stdlib.h>
-#include <stdint.h> 
+#include <stdint.h>
 
  /*****************************************************************************/
 

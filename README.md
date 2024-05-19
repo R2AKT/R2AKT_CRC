@@ -1,6 +1,6 @@
 ![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)
 # R2AKT_CRC
-R2AKT_CRC - библиотека для генерации CRC8, CRC16, CRC32 табличным способом.
+R2AKT_CRC - библиотека для генерации CRC8, CRC16, CRC32 табличным и полиноминальным способом.
 Используются стандартные полиномы.
 
 ### Совместимость

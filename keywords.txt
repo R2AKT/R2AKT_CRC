@@ -13,9 +13,12 @@ CRC32 KEYWORD1
 #######################################
 # Methods and Functions (KEYWORD2)
 #######################################
-crc8_calc	KEYWORD2
-crc16_calc KEYWORD2
-crc32_calc KEYWORD2
+crc8_calc_tbl KEYWORD2
+crc16_calc_tbl KEYWORD2
+crc32_calc_tbl KEYWORD2
+crc8_calc_poly KEYWORD2
+crc16_calc_poly KEYWORD2
+crc32_calc_poly KEYWORD2
 
 #######################################
 # Constants (LITERAL1)
